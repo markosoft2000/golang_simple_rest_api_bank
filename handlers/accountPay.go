@@ -9,11 +9,6 @@ import (
 
 func PayToAccount(db storage.DB) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != "PUT" {
-			http.Error(w, "wrong http method. PUT required", http.StatusBadRequest)
-			return
-		}
-
 		sendAccountId,err := strconv.Atoi(r.URL.Query().Get("sendAccountId"))
 		if sendAccountId <=0 || err !=nil {
 			http.Error(w, "sendAccountId is empty", http.StatusBadRequest)

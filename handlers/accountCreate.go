@@ -10,11 +10,6 @@ import (
 
 func CreateAccount(db storage.DB) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != "POST" {
-			http.Error(w, "wrong http method. POST required", http.StatusBadRequest)
-			return
-		}
-
 		r.ParseForm()
 
 		param,err := helpers.GetRequestParam(r, "id")

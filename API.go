@@ -14,10 +14,10 @@ func main()  {
 	accountStorage := storage.NewInMemoryDB()
 
 	muxRouter := mux.NewRouter().StrictSlash(true)
-	muxRouter.Handle("/account/create", handlers.CreateAccount(accountStorage))
-	muxRouter.Handle("/account/get/{id}", handlers.GetAccount(accountStorage))
-	muxRouter.Handle("/account/get/{id}/amount", handlers.GetAmount(accountStorage))
-	muxRouter.Handle("/account/pay", handlers.PayToAccount(accountStorage))
+	muxRouter.Handle("/account/create", handlers.CreateAccount(accountStorage)).Methods("POST")
+	muxRouter.Handle("/account/get/{id}", handlers.GetAccount(accountStorage)).Methods("GET")
+	muxRouter.Handle("/account/get/{id}/amount", handlers.GetAmount(accountStorage)).Methods("GET")
+	muxRouter.Handle("/account/pay", handlers.PayToAccount(accountStorage)).Methods("PUT")
 
 	err := http.ListenAndServe(":7000", muxRouter)
 

@@ -10,11 +10,6 @@ import (
 
 func GetAmount(db storage.DB) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != "GET" {
-			http.Error(w, "wrong http method. GET required", http.StatusBadRequest)
-			return
-		}
-
 		vars := mux.Vars(r)
 
 		id,err := strconv.Atoi(vars["id"])

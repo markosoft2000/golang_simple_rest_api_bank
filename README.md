@@ -9,10 +9,17 @@ go get github.com/gorilla/mux
 go run API.go
 
 
-
 # Account testing
 
-Out of test.go
+cd tests
+
+go test
+
+
+
+# hand tests
+
+Out of test/handTest.go
 
 id 1
 
@@ -65,7 +72,7 @@ Account 2 - Amount
 102001.01
 
 
-========================================================================================
+===================================
 
 
 

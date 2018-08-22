@@ -1,10 +1,10 @@
 //go get github.com/shopspring/decimal
-package main
+package tests
 
 import (
-	"./models"
-	"./modules/billing"
-	"./modules/storage"
+	"../models"
+	"../modules/billing"
+	"../modules/storage"
 	"fmt"
 	"time"
 )

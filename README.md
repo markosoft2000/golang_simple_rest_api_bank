@@ -1,6 +1,9 @@
 # golang simple rest api bank
 
+go get github.com/shopspring/decimal
+go get github.com/gorilla/mux
 
+go run API.go
 
 # testing REST API
 

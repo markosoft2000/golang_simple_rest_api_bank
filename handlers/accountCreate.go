@@ -52,6 +52,6 @@ func CreateAccount(db storage.DB) http.Handler {
 			return
 		}
 
-		w.WriteHeader(http.StatusOK)
+		w.WriteHeader(http.StatusCreated)
 	})
 }

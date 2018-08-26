@@ -4,48 +4,58 @@ import (
 	"net/http"
 	"../modules/storage"
 	"../models"
-	"../helpers"
-	"strconv"
+	"encoding/json"
+	"fmt"
+	"io/ioutil"
 )
+
+type CreateRequest struct {
+	Id int
+	Name string
+	Amount string
+}
+
 
 func CreateAccount(db storage.DB) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		r.ParseForm()
 
-		param,err := helpers.GetRequestParam(r, "id")
-		id,err := strconv.Atoi(param)
-		//id,err := strconv.Atoi(r.URL.Query().Get("id"));
-		if id <=0 || err !=nil {
+		body, err := ioutil.ReadAll(r.Body)
+		if err != nil {
+			fmt.Printf("Error reading the body: %v\n", err)
+			return
+		}
+		defer r.Body.Close()
+
+		var requestData CreateRequest
+		if err = json.Unmarshal(body, &requestData); err != nil {
+			panic(err)
+		}
+
+		if requestData.Id <= 0 {
 			http.Error(w, "id is empty" + err.Error(), http.StatusBadRequest)
 			return
 		}
 
-		name,err := helpers.GetRequestParam(r, "name")
-		//name := r.URL.Query().Get("name");
-		if name == "" {
+		if requestData.Name == "" {
 			http.Error(w, "name is empty", http.StatusBadRequest)
 
 			return
 		}
 
-		amount,err := helpers.GetRequestParam(r, "amount")
-		//amount := r.URL.Query().Get("amount")
-		if amount == "" {
+		if requestData.Amount == "" {
 			http.Error(w, "amount is empty", http.StatusBadRequest)
 
 			return
 		}
 
-		defer r.Body.Close()
-
-		if _, ok := db.Get(id); ok == nil {
+		if _, ok := db.Get(requestData.Id); ok == nil {
 			http.Error(w, "db error: can not create account (account exists)", http.StatusInternalServerError)
 			return
 		}
 
 		account := models.Account{}
-		account.Init(id, name)
-		account.SetAmount(amount)
+		account.Init(requestData.Id, requestData.Name)
+		account.SetAmount(requestData.Amount)
 
 		if ok := db.Set(account.GetId(), &account); !ok {
 			http.Error(w, "db error: can not create account", http.StatusInternalServerError)

@@ -2,40 +2,42 @@ package billing
 
 import (
 	"sync"
-	"fmt"
 	"../../models"
 )
 
 //some comments here
 
-var m = make(map[string] *sync.RWMutex)
+var transactionMutexMap = make(map[int] *sync.RWMutex)
 var mapMutex = new(sync.RWMutex)
 
-func genMutexKey(id1 int, id2 int) string {
-	format := "%d-%d"
+func getTransactionMutexOrCreate(id int) *sync.RWMutex {
+	mapMutex.Lock()
+	defer mapMutex.Unlock()
 
-	if id1 <= id2 {
-		return fmt.Sprintf(format, id1, id2)
-	} else {
-		return fmt.Sprintf(format, id2, id1)
+	if !existsTransactionMutex(id) {
+		transactionMutexMap[id] = new(sync.RWMutex)
 	}
+
+	return transactionMutexMap[id]
 }
 
+func existsTransactionMutex(id int) bool {
+	_, ok := transactionMutexMap[id]
+	return ok
+}
+
+//loop deadlock possible
+//1->2 | 2->3 | 3->7 | 4->8
+//1->2 | 2->3 | 3->1 | 4->8
+//1->3 | 2->3 | 3->1 | 4->8
 func lockMoneyTransaction(id1 int, id2 int) {
-	key := genMutexKey(id1, id2)
-
-	if _, ok := m[key]; !ok {
-		mapMutex.Lock()
-		m[key] = new(sync.RWMutex)
-		mapMutex.Unlock()
-	}
-
-	m[key].Lock()
+	getTransactionMutexOrCreate(id1).Lock()
+	getTransactionMutexOrCreate(id2).Lock()
 }
 
 func unlockMoneyTransaction(id1 int, id2 int) {
-	key := genMutexKey(id1, id2)
-	m[key].Unlock()
+	getTransactionMutexOrCreate(id1).Unlock()
+	getTransactionMutexOrCreate(id2).Unlock()
 }
 
 func PayToAccount(sendAccountPtr *models.Account, receiveAccountPtr *models.Account, summ string) bool {
@@ -43,12 +45,9 @@ func PayToAccount(sendAccountPtr *models.Account, receiveAccountPtr *models.Acco
 		return false
 	}
 
-	/*defer func() {
-		recover()
-	}()*/
-
 	//transaction start
 	lockMoneyTransaction(sendAccountPtr.GetId(), receiveAccountPtr.GetId())
+	defer unlockMoneyTransaction(sendAccountPtr.GetId(), receiveAccountPtr.GetId())
 
 	if !sendAccountPtr.GetAmount().Sub(summ) {
 		return false
@@ -59,8 +58,30 @@ func PayToAccount(sendAccountPtr *models.Account, receiveAccountPtr *models.Acco
 
 		return false
 	}
-
-	unlockMoneyTransaction(sendAccountPtr.GetId(), receiveAccountPtr.GetId())
 	//transaction finish
 	return true
+}
+
+//sync payment method
+
+var syncPaymentMutex = new(sync.Mutex)
+
+//1->2 , 2->3 , 3->1 , 4->8
+func PayToAccountSync(sendAccountPtr *models.Account, receiveAccountPtr *models.Account, summ string) bool {
+	if receiveAccountPtr.GetId() == sendAccountPtr.GetId() {
+		return false
+	}
+
+	syncPaymentMutex.Lock()
+	defer syncPaymentMutex.Unlock()
+
+	if sendAccountPtr.GetAmount().Available(summ) && sendAccountPtr.GetAmount().Sub(summ) {
+		if receiveAccountPtr.GetAmount().Add(summ) {
+			return true
+		} else {
+			sendAccountPtr.GetAmount().Add(summ)
+		}
+	}
+
+	return false
 }

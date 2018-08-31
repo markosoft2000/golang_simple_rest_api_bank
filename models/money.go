@@ -61,3 +61,13 @@ func (m *Money) Sub(summ string) bool {
 
 	return true
 }
+
+func (m *Money) Available(summ string) bool {
+	operand, err := decimalPkg.NewFromString(summ)
+
+	if err != nil {
+		return false
+	}
+
+	return m.Value.GreaterThanOrEqual(operand)
+}

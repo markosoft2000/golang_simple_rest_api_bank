@@ -44,3 +44,7 @@ func (d *AccountInMemoryDB) Remove(key int) bool {
 
 	return !ok
 }
+
+func (d *AccountInMemoryDB) Len() int {
+	return len(d.m)
+}

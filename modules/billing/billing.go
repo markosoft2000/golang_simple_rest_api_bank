@@ -85,3 +85,46 @@ func PayToAccountSync(sendAccountPtr *models.Account, receiveAccountPtr *models.
 
 	return false
 }
+
+
+//goroutine for payment channel
+type GoPay struct {
+	SendAccount    *models.Account
+	ReceiveAccount *models.Account
+	Summ           string
+	ResponseChan   chan bool
+}
+
+func GoPayToAccount(payChannel chan *GoPay, exitChannel chan bool) {
+	for {
+		select {
+			case payment := <- payChannel: {
+				func() {
+					if r := recover(); r != nil {
+						payment.ResponseChan <- false
+					}
+				}()
+
+				if payment.ReceiveAccount.GetId() == payment.SendAccount.GetId() {
+					payment.ResponseChan <- false
+					continue
+				}
+
+				result := false
+
+				if payment.SendAccount.GetAmount().Available(payment.Summ) && payment.SendAccount.GetAmount().Sub(payment.Summ) {
+					if payment.ReceiveAccount.GetAmount().Add(payment.Summ) {
+						result = true
+					} else {
+						payment.SendAccount.GetAmount().Add(payment.Summ)
+					}
+				}
+
+				payment.ResponseChan <- result
+			}
+
+			case <- exitChannel:
+				return
+		}
+	}
+}

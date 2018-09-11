@@ -1,6 +1,5 @@
 package storage
 
-
 import (
 	"errors"
 	"../../models"
@@ -14,4 +13,9 @@ type DB interface {
 	Get(key int) (*models.Account, error)
 	Set(key int, val *models.Account) bool
 	Remove(key int) bool
+}
+
+type DBPlus interface {
+	DB
+	Len() int
 }

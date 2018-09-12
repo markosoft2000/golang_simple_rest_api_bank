@@ -15,7 +15,7 @@ func main() {
 
 	account1 := models.Account{}
 	account1.Init(1, "Mark")
-	accountStorage.Set(account1.GetId(), &account1)
+	accountStorage.Create(account1.GetId(), &account1)
 	account1.SetAmount("2454354358735793579823794723875982738472387423759872385792374283748723947238749237.33")
 
 	fmt.Println(account1.GetId())
@@ -30,7 +30,7 @@ func main() {
 
 	account2 := models.Account{}
 	account2.Init(2, "Archi")
-	accountStorage.Set(account2.GetId(), &account2)
+	accountStorage.Create(account2.GetId(), &account2)
 	account2.SetAmount("1000")
 
 	fmt.Println("============before=================")

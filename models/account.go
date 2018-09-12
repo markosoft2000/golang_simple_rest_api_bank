@@ -52,6 +52,6 @@ func (u *Account) GetAmountAsString() string {
 	return u.Amount.String()
 }
 
-func (u *Account) SetAmount(amount string) {
-	u.Amount.Init(amount)
+func (u *Account) SetAmount(amount string) error {
+	return u.Amount.Init(amount)
 }

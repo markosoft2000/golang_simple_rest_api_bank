@@ -9,7 +9,7 @@ type Money struct {
 	Value decimalPkg.Decimal `json:"Value"`
 }
 
-func (m *Money) Init (amount string)  {
+func (m *Money) Init (amount string) error {
 	if amount == "" {
 		amount = "0.00"
 	}
@@ -17,14 +17,16 @@ func (m *Money) Init (amount string)  {
 	value,err := decimalPkg.NewFromString(amount)
 
 	if err != nil {
-		panic(err)
+		return err
 	}
 
 	m.Value = value
+
+	return nil
 }
 
-func (m *Money) Set(amount string)  {
-	m.Init(amount)
+func (m *Money) Set(amount string) error {
+	return m.Init(amount)
 }
 
 func (m *Money) String() string {

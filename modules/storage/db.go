@@ -6,12 +6,14 @@ import (
 )
 
 var (
-	ErrNotFound = errors.New("Error: item not found")
+	ErrNotFound = errors.New("error: item not found")
+	ErrAlreadyExists = errors.New("error: item already exists")
+	ErrCreateFailed = errors.New("error: item creation failed")
 )
 
 type DB interface {
 	Get(key int) (*models.Account, error)
-	Set(key int, val *models.Account) bool
+	Create(key int, val *models.Account) error
 	Remove(key int) bool
 }
 

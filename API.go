@@ -27,7 +27,7 @@ func main()  {
 	muxRouter.Handle("/account/pay", handlers.PayToAccount(accountStorage)).Methods("PUT")
 	muxRouter.Handle("/account/pay2", handlers.PayToAccountChan(accountStorage, payChan)).Methods("PUT")
 
-	err := http.ListenAndServe(":7000", muxRouter)
+	err := http.ListenAndServe(":7002", muxRouter)
 
 	if err != nil {
 		log.Fatal("ListenAndServe: ", err)

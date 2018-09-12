@@ -1,12 +1,12 @@
 package handlers
 
 import (
-	"net/http"
 	"../modules/storage"
 	"../models"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"net/http"
 )
 
 type CreateRequest struct {
@@ -48,17 +48,16 @@ func CreateAccount(db storage.DB) http.Handler {
 			return
 		}
 
-		if _, ok := db.Get(requestData.Id); ok == nil {
-			http.Error(w, "db error: can not create account (account exists)", http.StatusInternalServerError)
+		account := models.Account{}
+		account.Init(requestData.Id, requestData.Name)
+
+		if ok := account.SetAmount(requestData.Amount); ok != nil {
+			http.Error(w, ok.Error(), http.StatusInternalServerError)
 			return
 		}
 
-		account := models.Account{}
-		account.Init(requestData.Id, requestData.Name)
-		account.SetAmount(requestData.Amount)
-
-		if ok := db.Set(account.GetId(), &account); !ok {
-			http.Error(w, "db error: can not create account", http.StatusInternalServerError)
+		if ok := db.Create(requestData.Id, &account); ok != nil {
+			http.Error(w, ok.Error(), http.StatusInternalServerError)
 			return
 		}
 

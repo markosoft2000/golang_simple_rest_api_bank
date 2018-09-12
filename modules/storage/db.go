@@ -15,6 +15,7 @@ type DB interface {
 	Get(key int) (*models.Account, error)
 	Create(key int, val *models.Account) error
 	Remove(key int) bool
+	PayToAccount(sendAccountPtr *models.Account, receiveAccountPtr *models.Account, summ string) bool
 }
 
 type DBPlus interface {

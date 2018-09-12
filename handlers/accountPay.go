@@ -59,7 +59,7 @@ func PayToAccount(db storage.DB) http.Handler {
 			return
 		}
 
-		status := billing.PayToAccountSync(accountFrom, accountTo, requestData.Summ)
+		status := db.PayToAccount(accountFrom, accountTo, requestData.Summ)
 
 		if !status {
 			http.Error(w, "billing error: payment failed", http.StatusInternalServerError)
